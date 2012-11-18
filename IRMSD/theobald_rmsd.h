@@ -10,7 +10,7 @@ int quartic_equation_solve_exact(double *r1, double *r2, double *r3, double *r4,
 float msd_axis_major(const int nrealatoms, const int npaddedatoms, const int rowstride,
                      const float* aT, const float* bT, const float G_a, const float G_b);
 
-float msd_atom_major(const int nrealatoms, const int npaddedatoms
-                     const float* a, const float* b, const float G_a, const float G_b)
+float msd_atom_major(const int nrealatoms, const int npaddedatoms,
+                     const float* a, const float* b, const float G_a, const float G_b);
 
 #endif

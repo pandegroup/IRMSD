@@ -17,7 +17,7 @@
 
 
 #include "Python.h"
-#include "arrayobject.h"
+#include "numpy/arrayobject.h"
 #include <stdint.h>
 #include <stdio.h>
 #include "theobald_rmsd.h"
@@ -35,7 +35,7 @@
 
 
 static PyObject *_getMultipleRMSDs_axis_major(PyObject *self, PyObject *args) {
-    float *AData, *BData, *GAData, *distances;
+    float *AData, *BData, *GAData, *distances, G_y;
     int nrealatoms=-1, npaddedatoms=-1, rowstride=-1, truestride=-1;
     npy_intp dim2[2], *arrayADims;
     PyArrayObject *ary_coorda, *ary_coordb, *ary_Ga, *ary_distances;
@@ -92,7 +92,7 @@ static PyObject *_getMultipleRMSDs_axis_major(PyObject *self, PyObject *args) {
 }
 
 static PyObject *_getMultipleRMSDs_atom_major(PyObject *self, PyObject *args) {
-    float *AData, *BData, *GAData, *distances;
+    float *AData, *BData, *GAData, *distances, G_y;
     int nrealatoms=-1, npaddedatoms=-1;
     npy_intp dim2[2], *arrayADims;
     PyArrayObject *ary_coorda, *ary_coordb, *ary_Ga, *ary_distances;

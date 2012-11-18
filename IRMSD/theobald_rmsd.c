@@ -29,6 +29,7 @@
 //      Imran Haque  (ihaque AT cs.stanford.edu)
 //=============================================================================================
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <xmmintrin.h>
@@ -228,7 +229,6 @@ float msdFromMandG(const float M[9],const float G_x,const float G_y,const int nu
 
     float lambda = (G_x + G_y) / 2.0f;
 
-    unsigned int i;
     float rmsd2,ls_rmsd2;
     C_2 = 0.0f;
     for (int i = 0; i < m * m; i++)
@@ -310,19 +310,18 @@ float msd_axis_major(const int nrealatoms, const int npaddedatoms, const int row
      *       G_b:          trace of B'B
      */
 
-	int nIndex;
     // Will have 3 garbage elements at the end
     float M[12] __attribute__ ((aligned (16)));
     int niters = npaddedatoms >> 2;
     __m128 xx,xy,xz,yx,yy,yz,zx,zy,zz;
     __m128 ax,ay,az,b;
     __m128 t0,t1,t2;
-    float* aTx = aT;
-    float* aTy = aT+rowstride;
-    float* aTz = aT+2*rowstride;
-    float* bTx = bT;
-    float* bTy = bT+rowstride;
-    float* bTz = bT+2*rowstride;
+    const float* aTx = aT;
+    const float* aTy = aT+rowstride;
+    const float* aTz = aT+2*rowstride;
+    const float* bTx = bT;
+    const float* bTy = bT+rowstride;
+    const float* bTz = bT+2*rowstride;
 
     // npaddedatoms must be a multiple of 4
     assert(npaddedatoms % 4 == 0);
@@ -377,7 +376,7 @@ float msd_axis_major(const int nrealatoms, const int npaddedatoms, const int row
         bTz += 4;
     }
     // Epilogue - reduce 4 wide vectors to one wide
-    reduction_epilogue(xx, xy, xz, yx, yy, yz, zx, zy, zz, t0, t1, t2);
+    REDUCTION_EPILOGUE(xx, xy, xz, yx, yy, yz, zx, zy, zz, t0, t1, t2);
 
     _mm_store_ps(M  , xx);
     _mm_store_ps(M+4, yy);
@@ -434,7 +433,7 @@ float msd_atom_major(const int nrealatoms, const int npaddedatoms,
     int niters = npaddedatoms >> 2;
     __m128 xx,xy,xz,yx,yy,yz,zx,zy,zz;
     __m128 ax,ay,az,bx,by,bz;
-    __m128 t0,t1,t2,t3;
+    __m128 t0,t1,t2;
 
     // npaddedatoms must be a multiple of 4
     assert(npaddedatoms % 4 == 0);
@@ -442,28 +441,28 @@ float msd_atom_major(const int nrealatoms, const int npaddedatoms,
     xx = xy = xz = yx = yy = yz = zx = zy = zz = _mm_setzero_ps();
     for (int k = 0; k < niters; k++)
     {
-        aos_deinterleaved_load(b,bx,by,bz);
-        aos_deinterleaved_load(a,ax,ay,az);
+        aos_deinterleaved_load(b,&bx,&by,&bz);
+        aos_deinterleaved_load(a,&ax,&ay,&az);
 
-        t1 = bx;
-        t2 = by;
-        t3 = bz;
+        t0 = bx;
+        t1 = by;
+        t2 = bz;
+        t0 = _mm_mul_ps(t0,ax);
         t1 = _mm_mul_ps(t1,ax);
         t2 = _mm_mul_ps(t2,ax);
-        t3 = _mm_mul_ps(t3,ax);
-        xx = _mm_add_ps(xx,t1);
-        xy = _mm_add_ps(xy,t2);
-        xz = _mm_add_ps(xz,t3);
+        xx = _mm_add_ps(xx,t0);
+        xy = _mm_add_ps(xy,t1);
+        xz = _mm_add_ps(xz,t2);
 
-        t1 = bx;
-        t2 = by;
-        t3 = bz;
+        t0 = bx;
+        t1 = by;
+        t2 = bz;
+        t0 = _mm_mul_ps(t0,ay);
         t1 = _mm_mul_ps(t1,ay);
         t2 = _mm_mul_ps(t2,ay);
-        t3 = _mm_mul_ps(t3,ay);
-        yx = _mm_add_ps(yx,t1);
-        yy = _mm_add_ps(yy,t2);
-        yz = _mm_add_ps(yz,t3);
+        yx = _mm_add_ps(yx,t0);
+        yy = _mm_add_ps(yy,t1);
+        yz = _mm_add_ps(yz,t2);
 
         bx = _mm_mul_ps(bx,az);
         by = _mm_mul_ps(by,az);
@@ -475,7 +474,7 @@ float msd_atom_major(const int nrealatoms, const int npaddedatoms,
         a += 12;
         b += 12;
     }
-    reduction_epilogue(xx, xy, xz, yx, yy, yz, zx, zy, zz, t0, t1, t2);
+    REDUCTION_EPILOGUE(xx, xy, xz, yx, yy, yz, zx, zy, zz, t0, t1, t2);
 
     _mm_store_ps(M  , xx);
     _mm_store_ps(M+4, yy);
