@@ -47,7 +47,7 @@ def _allocate_aligned_array(shape, major):
     dtype = np.dtype(np.float32)
     alignment = 16 / dtype.itemsize
     if major not in ('atom', 'axis'):
-        raise ValueError("Must specify atom or axis major coordinates")
+        raise InvalidMajorityError("Must specify atom or axis major coordinates")
 
     if major == 'axis':
         n_confs, n_dims, n_atoms = shape
