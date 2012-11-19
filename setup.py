@@ -74,10 +74,12 @@ def main():
     if openmp_enabled:
         compiler_args.append('-fopenmp')
     compiler_libraries = ['gomp'] if needs_gomp else []
+    compiler_defs = [('USE_OPENMP', None)] if openmp_enabled else []
 
     rmsd_ext = Extension('IRMSD.rmsdcalc',
                          ['IRMSD/rmsdcalc.c', 'IRMSD/theobald_rmsd.c'],
                          extra_compile_args=compiler_args,
+                         define_macros=compiler_defs,
                          libraries=compiler_libraries,
                          include_dirs=[np_include, py_include])
 

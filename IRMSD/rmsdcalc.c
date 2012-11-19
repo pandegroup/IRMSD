@@ -21,7 +21,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "theobald_rmsd.h"
+#ifdef USE_OPENMP
 #include <omp.h>
+#endif
 
 
 #define CHECKARRAYTYPE(ary,name) if (PyArray_TYPE(ary) != NPY_FLOAT32) {\
@@ -80,7 +82,9 @@ static PyObject *_getMultipleRMSDs_axis_major(PyObject *self, PyObject *args) {
 
     truestride = npaddedatoms * 3;
 
+    #ifdef USE_OPENMP
     #pragma omp parallel for
+    #endif
     for (int i = 0; i < arrayADims[0]; i++) {
         float msd = msd_axis_major(nrealatoms, npaddedatoms, rowstride,
                                    (AData + i*truestride), BData, GAData[i], G_y);
@@ -135,7 +139,9 @@ static PyObject *_getMultipleRMSDs_atom_major(PyObject *self, PyObject *args) {
     ary_distances = (PyArrayObject*) PyArray_SimpleNew(1,dim2,NPY_FLOAT);
     distances = (float*) PyArray_DATA(ary_distances);
 
+    #ifdef USE_OPENMP
     #pragma omp parallel for
+    #endif
     for (int i = 0; i < arrayADims[0]; i++) {
         float msd = msd_atom_major(nrealatoms, npaddedatoms,
                                    (AData + i*npaddedatoms*3), BData, GAData[i], G_y);
