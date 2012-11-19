@@ -39,6 +39,9 @@ from the `python/` directory of the library.
 After installation, you may run `python/IRMSD/test.py` to run the regression
 test suite.
 
+Note: The version of clang in current versions of OS X does not support OpenMP,
+so parallel execution will not work on that platform.
+
 # Non-Python languages
 
 No wrappers for non-Python languages are currently distributed. However, the
