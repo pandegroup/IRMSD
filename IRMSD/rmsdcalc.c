@@ -45,7 +45,6 @@ static PyObject *_getMultipleRMSDs_axis_major(PyObject *self, PyObject *args) {
       return NULL;
     }
 
-  
     // Get pointers to array data
     AData  = (float*) PyArray_DATA(ary_coorda);
     BData  = (float*) PyArray_DATA(ary_coordb);
