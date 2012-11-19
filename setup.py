@@ -1,7 +1,12 @@
-import distutils.ccompiler
+from distutils.ccompiler import new_compiler
 from distutils.core import setup
 from distutils.extension import Extension
 import distutils.sysconfig
+import os
+import sys
+import tempfile
+import shutil
+
 import numpy as np
 
 # If your machine supports only SSE2 but not SSSE3, change the following
@@ -9,22 +14,53 @@ import numpy as np
 SSE2_ONLY = False
 
 
+# From http://stackoverflow.com/questions/
+#            7018879/disabling-output-when-compiling-with-distutils
+def hasfunction(cc, funcname):
+    tmpdir = tempfile.mkdtemp(prefix='irmsd-install-')
+    devnull = oldstderr = None
+    try:
+        try:
+            fname = os.path.join(tmpdir, 'funcname.c')
+            f = open(fname, 'w')
+            f.write('int main(void) {\n')
+            f.write('    %s();\n' % funcname)
+            f.write('}\n')
+            f.close()
+            # Redirect stderr to /dev/null to hide any error messages
+            # from the compiler.
+            # This will have to be changed if we ever have to check
+            # for a function on Windows.
+            devnull = open('/dev/null', 'w')
+            oldstderr = os.dup(sys.stderr.fileno())
+            os.dup2(devnull.fileno(), sys.stderr.fileno())
+            objects = cc.compile([fname], output_dir=tmpdir)
+            cc.link_executable(objects, os.path.join(tmpdir, "a.out"))
+        except:
+            return False
+        return True
+    finally:
+        if oldstderr is not None:
+            os.dup2(oldstderr, sys.stderr.fileno())
+        if devnull is not None:
+            devnull.close()
+        shutil.rmtree(tmpdir)
+
+
 def detect_openmp():
-    compiler = distutils.ccompiler.new_compiler()
-    print "Attempting to autodetect OpenMP; ignore anything between the lines."
-    print "-------------------------------------------------------------------"
-    hasopenmp = compiler.has_function('omp_get_num_threads')
+    compiler = new_compiler()
+    print "Attempting to autodetect OpenMP support...",
+    hasopenmp = hasfunction(compiler, 'omp_get_num_threads')
     needs_gomp = hasopenmp
     if not hasopenmp:
         compiler.add_library('gomp')
-        hasopenmp = compiler.has_function('omp_get_num_threads')
+        hasopenmp = hasfunction(compiler, 'omp_get_num_threads')
         needs_gomp = hasopenmp
-    print "-------------------------------------------------------------------"
     print
     if hasopenmp:
-        print "Detected compiler OpenMP support"
+        print "Compiler supports OpenMP"
     else:
-        print "Did not detect OpenMP support"
+        print "Did not detect OpenMP support; parallel RMSD disabled"
     return hasopenmp, needs_gomp
 
 
