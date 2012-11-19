@@ -62,13 +62,14 @@ static inline void aos_deinterleaved_load(const float* S, __m128* x, __m128* y, 
       xmm15 = zz0123 zy0123 xz0123 yx0123
 */ 
 #define REDUCTION_EPILOGUE(xx, xy, xz, yx, yy, yz, zx, zy, zz, t0, t1, t2) \
-xx = _mm_hadd_ps(xx,xy); \
-xz = _mm_hadd_ps(xz,yx); \
-yy = _mm_hadd_ps(yy,yz); \
-zx = _mm_hadd_ps(zx,zy); \
-zz = _mm_hadd_ps(zz,zy); \
-xx = _mm_hadd_ps(xx,xz); \
-yy = _mm_hadd_ps(yy,zx); \
+xx = _mm_hadd_ps(xx,xy); /* xx = xx01 xx23 xy01 xy23 */\
+xz = _mm_hadd_ps(xz,yx); /* xz = xz01 xz23 yx01 yx23 */\
+yy = _mm_hadd_ps(yy,yz); /* yy = yy01 yy23 yz01 yz23 */\
+zx = _mm_hadd_ps(zx,zy); /* zx = zx01 zx23 zy01 zy23 */\
+zz = _mm_hadd_ps(zz,zy); /* zz = zz01 zz23 zy01 zy23 */\
+xx = _mm_hadd_ps(xx,xz); /* xx = xx0123 xy0123 xz0123 yx0123 */\
+yy = _mm_hadd_ps(yy,zx); /* yy = yy0123 yz0123 zx0123 zy0123 */\
+zz = _mm_hadd_ps(zz,xz); /* zz = zz0123 zy0123 xz0123 yx0123 */\
 
 #else
 // Emulate horizontal adds using SSE2 UNPCKLPS/UNPCKHPS
