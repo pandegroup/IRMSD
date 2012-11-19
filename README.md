@@ -7,22 +7,22 @@ Theobald QCP method, and because of an efficient matrix multiply routine, is
 several-fold faster than other RMSD packages using off-the-shelf naive or
 generic high-performance matrix multiplies. In particular:
 
-    - With one thread, IRMSD is 4x the speed of the original Theobald code and
-      over 3x as fast as Theobald code modified to use GotoBLAS.
-    - IRMSD features automatic parallelization over multiple RMSD computations;
-      with four threads, it is twice the speed of similarly parallelized
-      Theobald code using GotoBLAS.
-    - IRMSD reaches the machine theoretical peak arithmetic performance when
-      using multiple threads and small structures that fit into L1 cache.
-    - IRMSD reaches the machine limit of memory bandwidth when dealing with
-      very large structures that do not fit into cache.
+- With one thread, IRMSD is 4x the speed of the original Theobald code and
+  over 3x as fast as Theobald code modified to use GotoBLAS.
+- IRMSD features automatic parallelization over multiple RMSD computations;
+  with four threads, it is twice the speed of similarly parallelized
+  Theobald code using GotoBLAS.
+- IRMSD reaches the machine theoretical peak arithmetic performance when
+  using multiple threads and small structures that fit into L1 cache.
+- IRMSD reaches the machine limit of memory bandwidth when dealing with
+  very large structures that do not fit into cache.
 
 IRMSD also fixes a small numerical instability in the Theobald QCP method that
 manifests as a lack of convergence in approximately one in 10^9 RMSD
 computations.
 
-If you use this code in computations that result in publication, please cite our
-paper: [upcoming].
+**If you use this code in computations that result in publication, please cite our
+paper: [upcoming].**
 
 # Installation
 
@@ -158,8 +158,8 @@ adjusted with the `OMP_NUM_THREADS` environment variable.
 RMSDs are returned as a one-dimensional, single-precision NumPy array.
 
 
-* NB: the array passed into the `Conformations` constructor may be modified by
-the routines in IRMSD! *
+**NB: the array passed into the `Conformations` constructor may be modified by
+the routines in IRMSD!**
 
 
 # Licensing
